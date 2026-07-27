@@ -19,7 +19,11 @@ interface Preferences {
 }
 
 export default function Command() {
-  const { isLoading, data: sessions, revalidate } = usePromise(async () => {
+  const {
+    isLoading,
+    data: sessions,
+    revalidate,
+  } = usePromise(async () => {
     return list_sessions();
   }, []);
   const { volumeStep } = getPreferenceValues<Preferences>();

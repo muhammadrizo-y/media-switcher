@@ -81,33 +81,15 @@ interface TrackInfoProps {
 // --- Components ---
 
 export function ActionPause({ appId, revalidate }: SessionProps) {
-  return (
-    <Action
-      title="Pause"
-      icon={Icon.Pause}
-      onAction={() => handlePause(appId, revalidate)}
-    />
-  );
+  return <Action title="Pause" icon={Icon.Pause} onAction={() => handlePause(appId, revalidate)} />;
 }
 
 export function ActionPlay({ appId, revalidate }: SessionProps) {
-  return (
-    <Action
-      title="Play"
-      icon={Icon.Play}
-      onAction={() => handlePlay(appId, revalidate)}
-    />
-  );
+  return <Action title="Play" icon={Icon.Play} onAction={() => handlePlay(appId, revalidate)} />;
 }
 
 export function ActionSwitch({ appId, revalidate }: SessionProps) {
-  return (
-    <Action
-      title="Switch to This Session"
-      icon={Icon.Switch}
-      onAction={() => handleSwitch(appId, revalidate)}
-    />
-  );
+  return <Action title="Switch to This Session" icon={Icon.Switch} onAction={() => handleSwitch(appId, revalidate)} />;
 }
 
 export function ActionReveal({ appId }: { appId: string }) {
