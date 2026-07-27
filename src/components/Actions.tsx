@@ -86,7 +86,11 @@ export function ActionPlay({ appId, sessionIndex, revalidate }: SessionProps) {
 
 export function ActionSwitch({ appId, sessionIndex, revalidate }: SessionProps) {
   return (
-    <Action title="Switch to This Session" icon={Icon.Switch} onAction={() => handleSwitch(appId, sessionIndex, revalidate)} />
+    <Action
+      title="Switch to This Session"
+      icon={Icon.Switch}
+      onAction={() => handleSwitch(appId, sessionIndex, revalidate)}
+    />
   );
 }
 

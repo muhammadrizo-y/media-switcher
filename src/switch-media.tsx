@@ -17,7 +17,11 @@ import { list_sessions } from "rust:../rust";
 const MAX_SAFE_STEP = 100;
 
 export default function Command() {
-  const { isLoading, data: sessions, revalidate } = usePromise(async () => {
+  const {
+    isLoading,
+    data: sessions,
+    revalidate,
+  } = usePromise(async () => {
     return list_sessions();
   }, []);
   const prefs = getPreferenceValues<{ volumeStep?: string }>();
@@ -58,7 +62,11 @@ export default function Command() {
                 </ActionPanel.Section>
               )}
               <ActionPanel.Section>
-                <ActionPreviousTrack appId={session.app_id} sessionIndex={session.session_index} revalidate={revalidate} />
+                <ActionPreviousTrack
+                  appId={session.app_id}
+                  sessionIndex={session.session_index}
+                  revalidate={revalidate}
+                />
                 <ActionNextTrack appId={session.app_id} sessionIndex={session.session_index} revalidate={revalidate} />
               </ActionPanel.Section>
               <ActionPanel.Section>
