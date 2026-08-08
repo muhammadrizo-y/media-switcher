@@ -123,12 +123,12 @@ const prevNextTrackShortcuts = preferences.prevNextTrackShortcuts;
 const prevTrackShortcut: Keyboard.Shortcut = {
   macOS: { modifiers: ["cmd"], key: prevNextTrackShortcuts === "squareBrackets" ? "[" : "arrowLeft" },
   Windows: { modifiers: ["ctrl"], key: prevNextTrackShortcuts === "squareBrackets" ? "[" : "arrowLeft" },
-}
+};
 
 const nextTrackShortcut: Keyboard.Shortcut = {
   macOS: { modifiers: ["cmd"], key: prevNextTrackShortcuts === "squareBrackets" ? "]" : "arrowRight" },
   Windows: { modifiers: ["ctrl"], key: prevNextTrackShortcuts === "squareBrackets" ? "]" : "arrowRight" },
-}
+};
 
 export function ActionPreviousTrack({ appId, sessionIndex, titlePrefix, revalidate }: SessionProps) {
   return (
