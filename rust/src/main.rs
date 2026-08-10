@@ -93,8 +93,12 @@ fn switch_session(target_app_id: String, target_index: u32, target_title_prefix:
     let target_pos = resolve_target_index(&entries, &target_app_id, target_index, &target_title_prefix)
         .ok_or_else(|| format!("Session {target_app_id}[{target_index}] not found or ambiguous — try refreshing"))?;
 
-    // Phase 1: pause every competitor, confirming each reached Paused.
-    let mut paused_positions: Vec<usize> = Vec::new();
+    // Phase 1: pause every competitor. Track every session whose pause request was
+    // ACCEPTED — confirmed or not — because an accepted pause can still complete
+    // after the confirmation poll times out, and rollback must restore it too.
+    // Resuming a still-playing session later is a harmless no-op, so including
+    // unconfirmed pauses in the rollback set is safe.
+    let mut pause_attempted_positions: Vec<usize> = Vec::new();
     let mut pause_errors: Vec<String> = Vec::new();
 
     for (i, entry) in entries.iter().enumerate() {
@@ -121,6 +125,7 @@ fn switch_session(target_app_id: String, target_index: u32, target_title_prefix:
         };
         match pause_result {
             Ok(_) => {
+                pause_attempted_positions.push(i);
                 let mut paused = false;
                 for _ in 0..50 {
                     if let Ok(info) = entry.session.GetPlaybackInfo() {
@@ -133,9 +138,7 @@ fn switch_session(target_app_id: String, target_index: u32, target_title_prefix:
                     }
                     std::thread::sleep(std::time::Duration::from_millis(50));
                 }
-                if paused {
-                    paused_positions.push(i);
-                } else {
+                if !paused {
                     pause_errors.push(format!("{} accepted pause but never reached paused state", label));
                 }
             }
@@ -146,7 +149,7 @@ fn switch_session(target_app_id: String, target_index: u32, target_title_prefix:
     // Starting the target while a competitor might still be playing would create
     // simultaneous playback. Undo what we paused and report instead.
     if !pause_errors.is_empty() {
-        let resume_errors = resume_sessions(&entries, &paused_positions);
+        let resume_errors = resume_sessions(&entries, &pause_attempted_positions);
         let mut msg = format!("Could not pause all playing sessions: {}", pause_errors.join("; "));
         if !resume_errors.is_empty() {
             msg.push_str(&format!("; resume failures: {}", resume_errors.join("; ")));
@@ -187,7 +190,7 @@ fn switch_session(target_app_id: String, target_index: u32, target_title_prefix:
     };
 
     if let Some(failure) = target_failure {
-        let resume_errors = resume_sessions(&entries, &paused_positions);
+        let resume_errors = resume_sessions(&entries, &pause_attempted_positions);
         let mut msg = failure;
         if !resume_errors.is_empty() {
             msg.push_str(&format!("; resume failures: {}", resume_errors.join("; ")));
@@ -294,37 +297,29 @@ fn snapshot_sessions() -> Result<Vec<SessionEntry>, String> {
 //      safe resolution when multiple same-app sessions share a title prefix.
 //   2. Exactly one session matches the title fingerprint — it moved ordinals
 //      (a sibling closed, order changed). Trust the title, not the number.
-//   3. Ordinal match with no title fingerprint — the track skipped and the title
-//      changed between render and action. Only trusted when this app exposes a
-//      single session: with no sibling, no other session could have shifted into
-//      the old ordinal. With two or more sessions the old ordinal's current
-//      occupant is indistinguishable from the clicked one, so we refuse to guess.
-//   Otherwise ambiguous (two+ sessions share the prefix) or missing → None.
-//   Guess-free: callers surface a "try refreshing" error rather than controlling
-//   the wrong session (e.g. two browser tabs with identical titles).
+//   Otherwise unmatched or ambiguous (two+ sessions share the prefix) → None.
+//   There is deliberately NO ordinal-only fallback: when no session matches the
+//   title, an ordinal match cannot distinguish "the selected session track-skipped"
+//   from "the selected session closed and a sibling now occupies its slot" — both
+//   present identically here — so guessing would risk controlling the wrong
+//   session. Callers surface a "try refreshing" error instead.
 fn resolve_target_index(
     entries: &[SessionEntry],
     target_app_id: &str,
     target_index: u32,
     target_title_prefix: &str,
 ) -> Option<usize> {
-    let mut index_match: Option<usize> = None;
     let mut title_matches: Vec<usize> = Vec::new();
-    let mut app_count = 0u32;
 
     for (i, entry) in entries.iter().enumerate() {
         if entry.app_id != target_app_id {
             continue;
         }
-        app_count += 1;
         let title_ok = !target_title_prefix.is_empty() && entry.title.starts_with(target_title_prefix);
 
         // 1. Exact (ordinal + title) match
         if entry.ordinal == target_index && title_ok {
             return Some(i);
-        }
-        if entry.ordinal == target_index {
-            index_match = Some(i);
         }
         if title_ok {
             title_matches.push(i);
@@ -334,15 +329,6 @@ fn resolve_target_index(
     // 2. Unique title match at a (possibly shifted) ordinal
     if title_matches.len() == 1 {
         return title_matches[0].into();
-    }
-
-    // 3. Ordinal match with no title fingerprint (track-skip case). Safe only
-    //    for single-session apps: a sibling closing or repositioning can't have
-    //    moved another session onto the clicked ordinal there.
-    if title_matches.is_empty() && app_count == 1 {
-        if let Some(i) = index_match {
-            return Some(i);
-        }
     }
 
     None
