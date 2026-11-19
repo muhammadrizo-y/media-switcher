@@ -1,14 +1,10 @@
 # Media Switcher Changelog
 
-## [Search and Detail Updates] - {PR_MERGE_DATE}
+## [Search Lyrics Action and Detail Updates] - {PR_MERGE_DATE}
 
 ### ✨ New
 
 - **Search Web for Lyrics**: Added a lyrics search action for the selected track
-
-### 💎 Improvements
-
-- **Keyboard Shortcuts**: Added `Ctrl` `Enter` / `⌘` `Enter` shortcut for Play / Pause so they work even if they're first action in the action panel
 
 ### 🐞 Fixes
 
