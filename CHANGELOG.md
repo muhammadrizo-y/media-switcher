@@ -1,20 +1,34 @@
 # Media Switcher Changelog
 
-## [Detail view and enhancements] - {PR_MERGE_DATE}
+## [Search and Detail Updates] - {PR_MERGE_DATE}
 
-✨ New
+### ✨ New
+
+- **Search Web for Lyrics**: Added a lyrics search action for the selected track
+
+### 💎 Improvements
+
+- **Keyboard Shortcuts**: Added `Ctrl` `Enter` / `⌘` `Enter` shortcut for Play / Pause so they work even if they're first action in the action panel
+
+### 🐞 Fixes
+
+- **Media Details**: Fixed rendering and heading sizing for bracketed or long track titles
+
+## [Detail View and Enhancements] - {PR_MERGE_DATE}
+
+### ✨ New
 
 - Detail panel with session artwork (album covers, video thumbnails), auto-sized by aspect ratio with compact headings for long titles
 - `Group playing sessions at the top` preference (Playing section)
 - Pin/Unpin for apps, kept in a Pinned section above everything
 - List search now covers app name and artist, not just title
 
-💎 Improvements
+### 💎 Improvements
 
 - Refreshes are faster: shortcut scanning and Store icon resolution moved out of the hot path and cached
 - Play/pause/switch confirmations resolve in under a second instead of up to 2.5s
 
-🐞 Fixes
+### 🐞 Fixes
 
 - Rapid Previous/Next no longer errors when the track changes mid-press
 
