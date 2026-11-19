@@ -1,6 +1,6 @@
 # Media Switcher Changelog
 
-## [Search and Detail Updates] - {PR_MERGE_DATE}
+## [Search Lyrics Action and Detail Updates] - {PR_MERGE_DATE}
 
 ### ✨ New
 
